@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="0" y="0" width="64" height="64" fill="#FAFBFC"/>
+  <rect x="10" y="0" width="4" height="64" fill="#D8586A" opacity="0.55"/>
+
+  <g transform="translate(4,3) scale(0.92)">
+    <line x1="16" y1="14" x2="58" y2="14" stroke="#DEE9F1" stroke-width="2.2"/>
+    <line x1="16" y1="26" x2="58" y2="26" stroke="#DEE9F1" stroke-width="2.2"/>
+    <line x1="16" y1="38" x2="58" y2="38" stroke="#DEE9F1" stroke-width="2.2"/>
+    <line x1="16" y1="50" x2="58" y2="50" stroke="#DEE9F1" stroke-width="2.2"/>
+
+    <rect x="16" y="19" width="15" height="7" rx="1.5" fill="#E7EFFA"/>
+    <rect x="16" y="19" width="3" height="7" rx="1" fill="#2F62B5"/>
+
+    <rect x="34" y="19" width="15" height="7" rx="1.5" fill="#FAEAEC"/>
+    <rect x="34" y="19" width="3" height="7" rx="1" fill="#B23A48"/>
+
+    <rect x="16" y="31" width="15" height="7" rx="1.5" fill="#EFEAF8"/>
+    <rect x="16" y="31" width="3" height="7" rx="1" fill="#6B4E9B"/>
+
+    <rect x="34" y="31" width="15" height="7" rx="1.5" fill="#E5F2EC"/>
+    <rect x="34" y="31" width="3" height="7" rx="1" fill="#2E7D5B"/>
+
+    <rect x="16" y="43" width="15" height="7" rx="1.5" fill="#E3F1F4"/>
+    <rect x="16" y="43" width="3" height="7" rx="1" fill="#2F8296"/>
+
+    <rect x="34" y="43" width="15" height="7" rx="1.5" fill="#FBEEE1"/>
+    <rect x="34" y="43" width="3" height="7" rx="1" fill="#D2701F"/>
+  </g>
+</svg>
