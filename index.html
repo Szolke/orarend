@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Órarend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700&family=Fira+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAFBFC;
+    --rule:#DEE9F1;
+    --rule-strong:#A9C6DC;
+    --margin:#D8586A;
+    --ink:#1E2A3A;
+    --ink-soft:#5C6B7E;
+    --ink-faint:#8D9AA9;
+
+    --mat:#2F62B5;      --mat-t:#E7EFFA;
+    --magyar:#B23A48;   --magyar-t:#FAEAEC;
+    --hittan:#6B4E9B;   --hittan-t:#EFEAF8;
+    --kornyezet:#2E7D5B;--kornyezet-t:#E5F2EC;
+    --digit:#2F8296;    --digit-t:#E3F1F4;
+    --mozgas:#D2701F;   --mozgas-t:#FBEEE1;
+    --kreativ:#A8841A;  --kreativ-t:#F7F0DA;
+    --ebed:#8C6E4A;     --ebed-t:#F2ECE4;
+    --onallo:#70808F;   --onallo-t:#F1F4F7;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    padding:clamp(12px,3vw,40px);
+    background:#EEF2F5;
+    color:var(--ink);
+    font-family:"Fira Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:16px;
+    line-height:1.45;
+  }
+
+  .sheet{
+    max-width:1180px;
+    margin:0 auto;
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(to right, var(--rule) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+    background-size:22px 22px;
+    border:1px solid var(--rule-strong);
+    border-radius:2px;
+    box-shadow:0 1px 0 #fff inset, 0 10px 30px -18px rgba(30,42,58,.45);
+    padding:clamp(18px,3.2vw,44px) clamp(16px,3.2vw,48px) clamp(24px,3vw,40px);
+    position:relative;
+    overflow:hidden;
+  }
+  /* füzet margószél */
+  .sheet::before{
+    content:"";
+    position:absolute; inset:0 auto 0 0;
+    width:3px;
+    background:var(--margin);
+    opacity:.55;
+  }
+
+  /* ---------- fejléc ---------- */
+  .masthead{
+    display:flex;
+    flex-wrap:wrap;
+    gap:clamp(16px,3vw,40px);
+    align-items:flex-end;
+    justify-content:space-between;
+    padding-bottom:18px;
+    margin-bottom:22px;
+    border-bottom:2px solid var(--rule-strong);
+  }
+  h1{
+    font-family:Bitter,Georgia,serif;
+    font-weight:700;
+    font-size:clamp(2.4rem,6vw,3.6rem);
+    line-height:.95;
+    letter-spacing:-.02em;
+    margin:0;
+  }
+  .subtitle{
+    margin:.5em 0 0;
+    color:var(--ink-soft);
+    font-size:.94rem;
+    max-width:34ch;
+  }
+
+  .now{
+    flex:1 1 300px;
+    max-width:420px;
+    background:#fff;
+    border:1px solid var(--rule-strong);
+    border-left:5px solid var(--nowcol,var(--ink-soft));
+    border-radius:3px;
+    padding:14px 18px 15px;
+    box-shadow:0 6px 18px -14px rgba(30,42,58,.6);
+  }
+  .now-label{
+    margin:0;
+    font-family:Bitter,Georgia,serif;
+    font-size:.82rem;
+    font-weight:500;
+    color:var(--ink-faint);
+  }
+  .now-subject{
+    margin:.15em 0 0;
+    font-family:Bitter,Georgia,serif;
+    font-size:clamp(1.35rem,3.4vw,1.75rem);
+    font-weight:700;
+    line-height:1.15;
+    color:var(--nowcol,var(--ink));
+  }
+  .now-meta{
+    margin:.35em 0 0;
+    font-size:.9rem;
+    color:var(--ink-soft);
+    font-variant-numeric:tabular-nums;
+  }
+  .now-next{
+    margin:.5em 0 0;
+    padding-top:.5em;
+    border-top:1px dotted var(--rule-strong);
+    font-size:.88rem;
+    color:var(--ink-soft);
+  }
+  .now-next b{color:var(--ink);font-weight:600}
+
+  /* ---------- napválasztó (mobil) ---------- */
+  .daytabs{display:none;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+  .daytabs button{
+    font:inherit;
+    font-size:.9rem;
+    font-weight:500;
+    padding:7px 12px;
+    border:1px solid var(--rule-strong);
+    background:#fff;
+    color:var(--ink-soft);
+    border-radius:2px;
+    cursor:pointer;
+  }
+  .daytabs button[aria-pressed="true"]{
+    background:var(--ink);
+    border-color:var(--ink);
+    color:#fff;
+  }
+  .daytabs button:focus-visible,
+  .sheet a:focus-visible{outline:2px solid var(--mat);outline-offset:2px}
+
+  /* ---------- rács ---------- */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+  }
+  caption{
+    caption-side:top;
+    text-align:left;
+    font-size:.9rem;
+    color:var(--ink-faint);
+    padding-bottom:10px;
+  }
+  th,td{padding:0;vertical-align:top}
+
+  thead th{
+    font-family:Bitter,Georgia,serif;
+    font-size:1rem;
+    font-weight:700;
+    text-align:left;
+    padding:0 0 8px 10px;
+    color:var(--ink);
+    border-bottom:2px solid var(--ink);
+  }
+  thead th.time-col{
+    width:96px;
+    padding-left:0;
+    font-weight:500;
+    color:var(--ink-faint);
+    font-size:.85rem;
+  }
+  thead th.is-today{color:var(--magyar)}
+  thead th.is-today::after{
+    content:" ma";
+    font-family:"Fira Sans",sans-serif;
+    font-size:.72rem;
+    font-weight:500;
+    letter-spacing:.02em;
+    color:#fff;
+    background:var(--magyar);
+    padding:1px 5px;
+    border-radius:2px;
+    margin-left:6px;
+    vertical-align:2px;
+  }
+
+  tbody tr td, tbody tr th{border-bottom:1px solid var(--rule-strong)}
+  th.time{
+    text-align:left;
+    font-weight:500;
+    font-size:.85rem;
+    color:var(--ink-soft);
+    font-variant-numeric:tabular-nums;
+    padding:12px 12px 12px 0;
+    white-space:nowrap;
+  }
+  th.time .alt{
+    display:block;
+    font-size:.75rem;
+    color:var(--ink-faint);
+  }
+
+  .cell{
+    display:block;
+    margin:6px 6px 6px 0;
+    padding:9px 8px 10px;
+    border-left:3px solid var(--sub,var(--onallo));
+    background:var(--tint,transparent);
+    border-radius:0 2px 2px 0;
+    min-height:44px;
+  }
+  .cell .name{
+    display:block;
+    font-weight:600;
+    font-size:clamp(.82rem,1.15vw,.98rem);
+    line-height:1.25;
+    color:var(--sub,var(--ink-soft));
+    letter-spacing:-.005em;
+    overflow-wrap:break-word;
+    word-break:break-word;
+    hyphens:auto;
+  }
+  .cell .note{
+    display:block;
+    font-size:.78rem;
+    color:var(--ink-faint);
+    margin-top:2px;
+  }
+
+  .c-mat{--sub:var(--mat);--tint:var(--mat-t)}
+  .c-magyar{--sub:var(--magyar);--tint:var(--magyar-t)}
+  .c-hittan{--sub:var(--hittan);--tint:var(--hittan-t)}
+  .c-kornyezet{--sub:var(--kornyezet);--tint:var(--kornyezet-t)}
+  .c-digit{--sub:var(--digit);--tint:var(--digit-t)}
+  .c-mozgas{--sub:var(--mozgas);--tint:var(--mozgas-t)}
+  .c-kreativ{--sub:var(--kreativ);--tint:var(--kreativ-t)}
+  .c-ebed{--sub:var(--ebed);--tint:var(--ebed-t)}
+  .c-onallo{--sub:var(--onallo);--tint:var(--onallo-t)}
+  .c-onallo .name{font-weight:400}
+
+  .band{
+    margin:6px 4px 6px 0;
+    padding:7px 12px;
+    border-left:3px solid var(--onallo);
+    background:#F1F4F7;
+    font-size:.88rem;
+    color:var(--ink-soft);
+  }
+
+  td.today-col{background:rgba(178,58,72,.045)}
+
+  .cell.is-now{
+    box-shadow:0 0 0 2px var(--sub), 0 4px 12px -8px rgba(30,42,58,.8);
+    background:#fff;
+    position:relative;
+  }
+  .cell.is-now .name{color:var(--sub);font-weight:600}
+  .cell.is-now .name::after{
+    content:"most";
+    font-size:.7rem;
+    font-weight:600;
+    color:#fff;
+    background:var(--sub);
+    padding:1px 5px;
+    border-radius:2px;
+    margin-left:7px;
+    vertical-align:1px;
+  }
+
+  /* ---------- jelmagyarázat ---------- */
+  .legend{
+    margin-top:26px;
+    padding-top:16px;
+    border-top:1px solid var(--rule-strong);
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 20px;
+    font-size:.85rem;
+    color:var(--ink-soft);
+  }
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:11px;height:11px;background:var(--c);border-radius:2px;display:inline-block}
+  .footnote{
+    margin:14px 0 0;
+    font-size:.8rem;
+    color:var(--ink-faint);
+    max-width:70ch;
+  }
+
+  /* ---------- mobil ---------- */
+  @media (max-width:760px){
+    body{padding:0}
+    .sheet{border-radius:0;border-left:none;border-right:none;background-size:20px 20px}
+    .masthead{align-items:flex-start;flex-direction:column}
+    .now{max-width:none;width:100%}
+    .daytabs{display:flex}
+    thead th.time-col{width:78px}
+    th.time{font-size:.8rem;padding-right:8px}
+    .grid[data-active="0"] [data-day]:not([data-day="0"]),
+    .grid[data-active="1"] [data-day]:not([data-day="1"]),
+    .grid[data-active="2"] [data-day]:not([data-day="2"]),
+    .grid[data-active="3"] [data-day]:not([data-day="3"]),
+    .grid[data-active="4"] [data-day]:not([data-day="4"]){display:none}
+    thead th.is-today::after{display:none}
+  }
+
+  /* ---------- nyomtatás ---------- */
+  @media print{
+    body{background:#fff;padding:0;font-size:11pt}
+    .sheet{box-shadow:none;border:none;background-image:none;padding:0}
+    .sheet::before,.daytabs,.now{display:none}
+    .grid [data-day]{display:table-cell !important}
+    thead th{border-bottom:1.5pt solid #000}
+    .cell{border-left-width:2pt;min-height:0;padding:5px 7px}
+    td.today-col{background:none}
+    .cell.is-now{box-shadow:none}
+    .cell.is-now .name::after{display:none}
+  }
+
+  @media (prefers-reduced-motion:no-preference){
+    .now{transition:border-color .3s ease}
+  }
+</style>
+</head>
+<body>
+
+<main class="sheet">
+  <header class="masthead">
+    <div>
+      <h1>Órarend</h1>
+      <p class="subtitle">Hétfőtől péntekig, napkezdéstől a délutáni sávok végéig.</p>
+    </div>
+    <aside class="now" id="now" aria-live="polite">
+      <p class="now-label" id="nowLabel">Most</p>
+      <p class="now-subject" id="nowSubject">—</p>
+      <p class="now-meta" id="nowMeta"></p>
+      <p class="now-next" id="nowNext"></p>
+    </aside>
+  </header>
+
+  <nav class="daytabs" id="daytabs" aria-label="Nap választása"></nav>
+
+  <table class="grid" id="grid">
+    <caption>Heti beosztás — a mai nap kiemelve.</caption>
+    <thead><tr id="head"></tr></thead>
+    <tbody id="body"></tbody>
+  </table>
+
+  <div class="legend" id="legend"></div>
+  <p class="footnote">A délutáni sávoknál zárójelben szereplő időpontok az eredeti órarend szerinti eltérő időpontok.</p>
+</main>
+
+<script>
+(function(){
+  const DAYS = ["Hétfő","Kedd","Szerda","Csütörtök","Péntek"];
+  const SHORT = ["H","K","Sze","Cs","P"];
+
+  const SLOTS = [
+    {t:"7:45–8:15",  s:465, e:495, uniform:"napkezdés"},
+    {t:"8:15–9:00",  s:495, e:540, r:["reggeli kör","Matematika","Magyar","Magyar","Matematika"]},
+    {t:"9:15–10:00", s:555, e:600, r:["Matematika","Önálló","Magyar","Magyar","Hittan"]},
+    {t:"10:15–11:00",s:615, e:660, r:["Hittan","Környezetismeret","Testnevelés","Rajz","Digitális kultúra"]},
+    {t:"11:10–11:55",s:670, e:715, r:["Önálló + ebéd","Tánc","Önálló","Önálló","Önálló"]},
+    {t:"12:05–12:50",s:725, e:770, r:["Ének","Ebéd + önálló","Ebéd + önálló","Ebéd + önálló","Ebéd + önálló"]},
+    {t:"13:00–13:45",s:780, e:825, alt:"14:00", r:["Magyar","Magyar","Matematika","Úszás","Technika"]},
+    {t:"13:55–14:40",s:835, e:880, alt:"15:00", r:["Önálló","Rajz","Önálló","Úszás","Testnevelés az udvaron"]},
+    {t:"14:50–15:35",s:890, e:935, alt:"16:00", r:["Testnevelés","Önálló","Ének","Matematika","Önálló"]}
+  ];
+
+  const CATS = [
+    [/matematika/i,        "mat"],
+    [/magyar/i,            "magyar"],
+    [/hittan/i,            "hittan"],
+    [/környezet/i,         "kornyezet"],
+    [/digit/i,             "digit"],
+    [/testnevelés|úszás|tánc/i, "mozgas"],
+    [/rajz|ének|technika/i,"kreativ"],
+    [/ebéd/i,              "ebed"],
+    [/önálló|napkezdés|reggeli/i, "onallo"]
+  ];
+  const catOf = n => (CATS.find(c => c[0].test(n)) || [,"onallo"])[1];
+
+  const LEGEND = [
+    ["Matematika","--mat"],["Magyar","--magyar"],["Hittan","--hittan"],
+    ["Környezetismeret","--kornyezet"],["Digitális kultúra","--digit"],
+    ["Mozgás","--mozgas"],["Készségtárgyak","--kreativ"],["Ebéd","--ebed"],["Önálló","--onallo"]
+  ];
+
+  const grid = document.getElementById("grid");
+  const head = document.getElementById("head");
+  const body = document.getElementById("body");
+
+  // --- fejléc sor ---
+  head.innerHTML = '<th class="time-col" scope="col">Idősáv</th>' +
+    DAYS.map((d,i)=>`<th scope="col" data-day="${i}">${d}</th>`).join("");
+
+  // --- sorok ---
+  body.innerHTML = SLOTS.map((slot, si) => {
+    const time = `<th class="time" scope="row">${slot.t}${slot.alt ? `<span class="alt">(${slot.alt})</span>` : ""}</th>`;
+    if (slot.uniform){
+      return `<tr>${time}<td colspan="5"><div class="band">${slot.uniform} — minden reggel</div></td></tr>`;
+    }
+    const cells = slot.r.map((name,di)=>{
+      const short = name.replace(" az udvaron","");
+      const note  = name.includes("udvaron") ? "az udvaron" : "";
+      const disp  = short
+        .replace("Környezetismeret","Környezet\u00ADismeret")
+        .replace("Testnevelés","Test\u00ADnevelés");
+      return `<td data-day="${di}"><div class="cell c-${catOf(name)}" data-slot="${si}" data-d="${di}">`+
+             `<span class="name">${disp}</span>${note?`<span class="note">${note}</span>`:""}</div></td>`;
+    }).join("");
+    return `<tr>${time}${cells}</tr>`;
+  }).join("");
+
+  // --- jelmagyarázat ---
+  document.getElementById("legend").innerHTML = LEGEND
+    .map(([l,v]) => `<span><i style="--c:var(${v})"></i>${l}</span>`).join("");
+
+  // --- napválasztó ---
+  const tabs = document.getElementById("daytabs");
+  tabs.innerHTML = DAYS.map((d,i)=>`<button type="button" data-i="${i}" aria-pressed="false">${d}</button>`).join("");
+  function selectDay(i){
+    grid.dataset.active = i;
+    [...tabs.children].forEach(b => b.setAttribute("aria-pressed", b.dataset.i == i));
+  }
+  tabs.addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (b) selectDay(+b.dataset.i);
+  });
+
+  // --- élő állapot ---
+  const fmt = m => `${Math.floor(m/60)}:${String(m%60).padStart(2,"0")}`;
+  const nameAt = (d,s) => SLOTS[s].uniform || SLOTS[s].r[d];
+
+  function render(){
+    const now = new Date();
+    const dow = now.getDay();            // 0 = vasárnap
+    const day = dow - 1;                 // 0..4 hétköznap
+    const min = now.getHours()*60 + now.getMinutes();
+    const school = day >= 0 && day <= 4;
+
+    document.querySelectorAll(".is-now").forEach(el => el.classList.remove("is-now"));
+    document.querySelectorAll(".today-col").forEach(el => el.classList.remove("today-col"));
+    document.querySelectorAll("thead .is-today").forEach(el => el.classList.remove("is-today"));
+
+    let label = "Most", subject = "—", meta = "", next = "", color = "var(--ink-soft)";
+
+    if (school){
+      document.querySelectorAll(`thead th[data-day="${day}"]`).forEach(el => el.classList.add("is-today"));
+      document.querySelectorAll(`tbody td[data-day="${day}"]`).forEach(el => el.classList.add("today-col"));
+
+      const cur  = SLOTS.findIndex(s => min >= s.s && min < s.e);
+      const upIx = SLOTS.findIndex(s => s.s > min);
+
+      if (cur > -1){
+        const cell = document.querySelector(`.cell[data-slot="${cur}"][data-d="${day}"]`);
+        const cat  = catOf(nameAt(day,cur));
+        if (cell) cell.classList.add("is-now");
+        color   = `var(--${cat})`;
+        subject = nameAt(day,cur);
+        meta    = `${SLOTS[cur].t} · ${DAYS[day]}`;
+        next    = upIx > -1
+          ? `Utána: <b>${nameAt(day,upIx)}</b> ${fmt(SLOTS[upIx].s)}-kor`
+          : "Ez az utolsó sáv mára.";
+      } else if (upIx > -1){
+        label   = "Szünet";
+        subject = nameAt(day,upIx);
+        color   = `var(--${catOf(subject)})`;
+        meta    = `${fmt(SLOTS[upIx].s)}-kor kezdődik · ${DAYS[day]}`;
+        next    = `Még <b>${SLOTS[upIx].s - min} perc</b>.`;
+      } else {
+        label   = "Mára vége";
+        subject = day < 4 ? `Holnap: ${DAYS[day+1]}` : "Hétvége következik";
+        meta    = day < 4 ? `Napkezdés ${fmt(SLOTS[0].s)}` : "Hétfőn 7:45-kor folytatjuk.";
+      }
+    } else {
+      label   = "Hétvége";
+      subject = "Nincs tanítás";
+      meta    = "Hétfőn 7:45-kor napkezdés.";
+    }
+
+    document.getElementById("nowLabel").textContent   = label;
+    document.getElementById("nowSubject").textContent = subject;
+    document.getElementById("nowMeta").textContent    = meta;
+    document.getElementById("nowNext").innerHTML      = next;
+    document.getElementById("now").style.setProperty("--nowcol", color);
+
+    return school ? day : 0;
+  }
+
+  selectDay(render());
+  setInterval(render, 30000);
+})();
+</script>
+</body>
+</html>
