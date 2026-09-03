@@ -26,6 +26,7 @@
     --kreativ:#A8841A;  --kreativ-t:#F7F0DA;
     --ebed:#8C6E4A;     --ebed-t:#F2ECE4;
     --onallo:#70808F;   --onallo-t:#F1F4F7;
+    --extra:#A6326E;    --extra-t:#FBE9F1;
   }
 
   *{box-sizing:border-box}
@@ -295,6 +296,81 @@
     vertical-align:1px;
   }
 
+  /* ---------- délutáni programok ---------- */
+  .extras{
+    margin-top:26px;
+    padding-top:18px;
+    border-top:2px solid var(--rule-strong);
+  }
+  .extras h2{
+    font-family:Bitter,Georgia,serif;
+    font-size:1.05rem;
+    font-weight:700;
+    margin:0 0 4px;
+  }
+  .extras .extras-sub{
+    margin:0 0 14px;
+    font-size:.85rem;
+    color:var(--ink-faint);
+  }
+  .extras-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:12px;
+  }
+  .extras-col{min-width:0}
+  .extras-col h3{
+    font-family:Bitter,Georgia,serif;
+    font-size:.85rem;
+    font-weight:700;
+    margin:0 0 8px;
+    color:var(--ink-soft);
+  }
+  .extras-col h3.is-today{color:var(--magyar)}
+  .extra-card{
+    border-left:3px dashed var(--extra);
+    background:var(--extra-t);
+    border-radius:0 2px 2px 0;
+    padding:8px 9px 9px;
+    margin-bottom:8px;
+  }
+  .extra-card .extra-time{
+    display:block;
+    font-size:.72rem;
+    font-variant-numeric:tabular-nums;
+    color:var(--ink-soft);
+  }
+  .extra-card .extra-name{
+    display:block;
+    font-weight:600;
+    font-size:.86rem;
+    color:var(--extra);
+    line-height:1.25;
+    margin-top:1px;
+  }
+  .extra-card .extra-note{
+    display:block;
+    font-size:.75rem;
+    color:var(--ink-faint);
+    margin-top:2px;
+  }
+  .extra-card.is-now{
+    box-shadow:0 0 0 2px var(--extra), 0 4px 12px -8px rgba(30,42,58,.8);
+    background:#fff;
+  }
+  .extra-card.is-now .extra-name::after{
+    content:"most";
+    font-size:.68rem;
+    font-weight:600;
+    color:#fff;
+    background:var(--extra);
+    padding:1px 5px;
+    border-radius:2px;
+    margin-left:6px;
+    vertical-align:1px;
+  }
+  .extras-empty{font-size:.78rem;color:var(--ink-faint);font-style:italic;margin:0}
+
   /* ---------- jelmagyarázat ---------- */
   .legend{
     margin-top:26px;
@@ -363,6 +439,13 @@
     .grid[data-active="2"] [data-day]:not([data-day="2"]),
     .grid[data-active="3"] [data-day]:not([data-day="3"]),
     .grid[data-active="4"] [data-day]:not([data-day="4"]){display:none}
+
+    .extras-grid{display:block}
+    .extras-grid[data-active="0"] [data-day]:not([data-day="0"]),
+    .extras-grid[data-active="1"] [data-day]:not([data-day="1"]),
+    .extras-grid[data-active="2"] [data-day]:not([data-day="2"]),
+    .extras-grid[data-active="3"] [data-day]:not([data-day="3"]),
+    .extras-grid[data-active="4"] [data-day]:not([data-day="4"]){display:none}
   }
 
   @media (max-width:400px){
@@ -412,6 +495,12 @@
     <tbody id="body"></tbody>
   </table>
 
+  <section class="extras" id="extrasSection">
+    <h2>Délutáni programok</h2>
+    <p class="extras-sub">Iskolán kívüli vagy egyedi elfoglaltságok — az órarenddel átfedésben is lehetnek.</p>
+    <div class="extras-grid" id="extrasGrid"></div>
+  </section>
+
   <div class="legend" id="legend"></div>
   <p class="footnote">A délutáni sávoknál zárójelben szereplő időpontok az eredeti órarend szerinti eltérő időpontok.</p>
 </main>
@@ -430,8 +519,7 @@
     {t:"12:05–12:50",s:725, e:770, r:["Ének","Ebéd + önálló","Ebéd + önálló","Ebéd + önálló","Ebéd + önálló"]},
     {t:"13:00–13:45",s:780, e:825, alt:"14:00", r:["Magyar","Magyar","Matematika","Úszás","Technika"]},
     {t:"13:55–14:40",s:835, e:880, alt:"15:00", r:["Önálló","Rajz","Önálló","Úszás","Testnevelés az udvaron"]},
-    {t:"14:50–15:35",s:890, e:935, alt:"16:00", r:["Testnevelés","Önálló","Ének","Matematika","Önálló"]},
-    {t:"16:30–18:00",s:990, e:1080, r:["–","–","Fejlesztés","–","–"]}
+    {t:"14:50–15:35",s:890, e:935, alt:"16:00", r:["Testnevelés","Önálló","Ének","Matematika","Önálló"]}
   ];
 
   const CATS = [
@@ -450,7 +538,13 @@
   const LEGEND = [
     ["Matematika","--mat"],["Magyar","--magyar"],["Hittan","--hittan"],
     ["Környezetismeret","--kornyezet"],["Digitális kultúra","--digit"],
-    ["Mozgás","--mozgas"],["Készségtárgyak","--kreativ"],["Ebéd","--ebed"],["Önálló","--onallo"]
+    ["Mozgás","--mozgas"],["Készségtárgyak","--kreativ"],["Ebéd","--ebed"],["Önálló","--onallo"],
+    ["Délutáni program","--extra"]
+  ];
+
+  // day: 0=hétfő .. 4=péntek; s/e: percek éjféltől
+  const EXTRAS = [
+    {day:2, t:"16:30–18:00", s:990, e:1080, name:"Fejlesztés"}
   ];
 
   const grid = document.getElementById("grid");
@@ -483,6 +577,20 @@
   document.getElementById("legend").innerHTML = LEGEND
     .map(([l,v]) => `<span><i style="--c:var(${v})"></i>${l}</span>`).join("");
 
+  // --- délutáni programok ---
+  const extrasGrid = document.getElementById("extrasGrid");
+  extrasGrid.innerHTML = DAYS.map((d,di) => {
+    const items = EXTRAS.filter(x => x.day === di);
+    const cards = items.length
+      ? items.map(x => `<div class="extra-card" data-extra data-day="${di}" data-s="${x.s}" data-e="${x.e}">`+
+          `<span class="extra-time">${x.t}</span>`+
+          `<span class="extra-name">${x.name}</span>`+
+          (x.note ? `<span class="extra-note">${x.note}</span>` : "")+
+          `</div>`).join("")
+      : `<p class="extras-empty">—</p>`;
+    return `<div class="extras-col" data-day="${di}"><h3 data-day="${di}">${d}</h3>${cards}</div>`;
+  }).join("");
+
   // --- napválasztó ---
   const tabs = document.getElementById("daytabs");
   tabs.innerHTML = DAYS.map((d,i)=>
@@ -490,6 +598,7 @@
     `<span class="full">${d}</span><span class="short">${SHORT[i]}</span></button>`).join("");
   function selectDay(i){
     grid.dataset.active = i;
+    extrasGrid.dataset.active = i;
     [...tabs.children].forEach(b => b.setAttribute("aria-pressed", b.dataset.i == i));
   }
   tabs.addEventListener("click", e => {
@@ -510,9 +619,20 @@
 
     document.querySelectorAll(".is-now").forEach(el => el.classList.remove("is-now"));
     document.querySelectorAll(".today-col").forEach(el => el.classList.remove("today-col"));
-    document.querySelectorAll("thead .is-today").forEach(el => el.classList.remove("is-today"));
+    document.querySelectorAll("thead .is-today, .extras-col h3.is-today").forEach(el => el.classList.remove("is-today"));
 
-    let label = "Most", subject = "—", meta = "", next = "", color = "var(--ink-soft)";
+    let label = "Most", subject = "—", meta = "", next = "", color = "var(--ink-soft)", extraNow = "";
+
+    const todayIx = day >= 0 && day <= 4 ? day : -1;
+    if (todayIx > -1){
+      document.querySelectorAll(`.extras-col h3[data-day="${todayIx}"]`).forEach(el => el.classList.add("is-today"));
+      const activeExtra = EXTRAS.find(x => x.day === todayIx && min >= x.s && min < x.e);
+      document.querySelectorAll(`.extra-card[data-day="${todayIx}"]`).forEach(el => {
+        const s = +el.dataset.s, e = +el.dataset.e;
+        el.classList.toggle("is-now", min >= s && min < e);
+      });
+      if (activeExtra) extraNow = `Emellett zajlik: <b>${activeExtra.name}</b> (${activeExtra.t})`;
+    }
 
     if (school){
       const tabToday = tabs.querySelector(`button[data-i="${day}"]`);
@@ -554,7 +674,7 @@
     document.getElementById("nowLabel").textContent   = label;
     document.getElementById("nowSubject").textContent = subject;
     document.getElementById("nowMeta").textContent    = meta;
-    document.getElementById("nowNext").innerHTML      = next;
+    document.getElementById("nowNext").innerHTML      = [next, extraNow].filter(Boolean).join("<br>");
     document.getElementById("now").style.setProperty("--nowcol", color);
 
     return school ? day : 0;
