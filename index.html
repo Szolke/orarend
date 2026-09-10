@@ -27,6 +27,8 @@
     --ebed:#8C6E4A;     --ebed-t:#F2ECE4;
     --onallo:#70808F;   --onallo-t:#F1F4F7;
     --extra:#A6326E;    --extra-t:#FBE9F1;
+    --friend:#3DA35D;   --friend-t:#E7F5EB;
+    --yellow:#C9A227;   --yellow-t:#FBF3D6;
   }
 
   *{box-sizing:border-box}
@@ -266,6 +268,8 @@
   .c-ebed{--sub:var(--ebed);--tint:var(--ebed-t)}
   .c-onallo{--sub:var(--onallo);--tint:var(--onallo-t)}
   .c-onallo .name{font-weight:400}
+  .c-friend{--sub:var(--friend);--tint:var(--friend-t)}
+  .c-yellow{--sub:var(--yellow);--tint:var(--yellow-t)}
 
   .band{
     margin:6px 4px 6px 0;
@@ -504,7 +508,10 @@
   <section class="extras" id="friendsSection">
     <h2>Barátnők</h2>
     <p class="extras-sub">Baráti találkozók, programok.</p>
-    <div class="extras-grid" id="friendsGrid"></div>
+    <table class="grid" id="friendsTable">
+      <thead><tr id="friendsHead"></tr></thead>
+      <tbody id="friendsBody"></tbody>
+    </table>
   </section>
 
   <div class="legend" id="legend"></div>
@@ -559,7 +566,11 @@
     {day:1, t:"16:30–17:15", s:990, e:1035, name:"Önismereti szakkör"}
   ];
 
-  const FRIENDS = [];
+  // name + napi érték (Hétfő..Péntek); "-" = nincs, egyéb szöveg = státusz; color = kitöltött napok színe
+  const FRIENDS = [
+    {name:"Eszti", days:["17:15","16:45","-","nem jó","-"], color:"friend"},
+    {name:"Norcsi", days:["✓","✓","✓","✓","✓"], color:"yellow"}
+  ];
 
   const grid = document.getElementById("grid");
   const head = document.getElementById("head");
@@ -606,9 +617,22 @@
     }).join("");
   }
   const extrasGrid = document.getElementById("extrasGrid");
-  const friendsGrid = document.getElementById("friendsGrid");
   renderExtrasGrid(extrasGrid, EXTRAS);
-  renderExtrasGrid(friendsGrid, FRIENDS);
+
+  // --- barátnők (egy sor / fő) ---
+  const friendsTable = document.getElementById("friendsTable");
+  const friendsHead = document.getElementById("friendsHead");
+  const friendsBody = document.getElementById("friendsBody");
+  friendsHead.innerHTML = '<th class="time-col" scope="col">Név</th>' +
+    DAYS.map((d,i)=>`<th scope="col" data-day="${i}">${d}</th>`).join("");
+  friendsBody.innerHTML = FRIENDS.map(f => {
+    const cells = f.days.map((val,di) => {
+      const filled = val !== "-";
+      return `<td data-day="${di}"><div class="cell ${filled ? "c-"+f.color : "c-onallo"}">`+
+             `<span class="name">${val}</span></div></td>`;
+    }).join("");
+    return `<tr><th class="time" scope="row">${f.name}</th>${cells}</tr>`;
+  }).join("");
 
   // --- napválasztó ---
   const tabs = document.getElementById("daytabs");
@@ -618,7 +642,7 @@
   function selectDay(i){
     grid.dataset.active = i;
     extrasGrid.dataset.active = i;
-    friendsGrid.dataset.active = i;
+    friendsTable.dataset.active = i;
     [...tabs.children].forEach(b => b.setAttribute("aria-pressed", b.dataset.i == i));
   }
   tabs.addEventListener("click", e => {
