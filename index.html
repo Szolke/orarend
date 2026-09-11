@@ -29,6 +29,8 @@
     --extra:#A6326E;    --extra-t:#FBE9F1;
     --friend:#3DA35D;   --friend-t:#E7F5EB;
     --yellow:#C9A227;   --yellow-t:#FBF3D6;
+    --tanar1:#3457A6;   --tanar1-t:#E9EDF8;
+    --tanar2:#B5541F;   --tanar2-t:#F6EAE0;
   }
 
   *{box-sizing:border-box}
@@ -90,8 +92,12 @@
     margin:.5em 0 0;
     color:var(--ink-soft);
     font-size:.94rem;
-    max-width:34ch;
+    white-space:nowrap;
   }
+  .subtitle .who{font-weight:600}
+  .subtitle .who.c-tanar1{color:var(--tanar1)}
+  .subtitle .who.c-tanar2{color:var(--tanar2)}
+  .subtitle .who.is-today{text-decoration:underline}
 
   .now{
     flex:1 1 300px;
@@ -175,13 +181,6 @@
     width:100%;
     border-collapse:collapse;
     table-layout:fixed;
-  }
-  caption{
-    caption-side:top;
-    text-align:left;
-    font-size:.9rem;
-    color:var(--ink-faint);
-    padding-bottom:10px;
   }
   th,td{padding:0;vertical-align:top}
 
@@ -310,12 +309,7 @@
     font-family:Bitter,Georgia,serif;
     font-size:1.05rem;
     font-weight:700;
-    margin:0 0 4px;
-  }
-  .extras .extras-sub{
     margin:0 0 14px;
-    font-size:.85rem;
-    color:var(--ink-faint);
   }
   .extras-grid{
     display:grid;
@@ -418,7 +412,7 @@
     }
 
     /* a táblázat sorai listaelemként viselkednek */
-    caption,thead{display:none}
+    thead{display:none}
     tbody tr{
       display:flex;
       align-items:stretch;
@@ -481,7 +475,7 @@
   <header class="masthead">
     <div>
       <h1>Órarend</h1>
-      <p class="subtitle">Hétfőtől péntekig, napkezdéstől a délutáni sávok végéig.</p>
+      <p class="subtitle" id="teacherInfo" aria-label="Tanítók heti beosztása"></p>
     </div>
     <aside class="now" id="now" aria-live="polite">
       <p class="now-label" id="nowLabel">Most</p>
@@ -494,20 +488,17 @@
   <nav class="daytabs" id="daytabs" aria-label="Nap választása"></nav>
 
   <table class="grid" id="grid">
-    <caption>Heti beosztás — a mai nap kiemelve.</caption>
     <thead><tr id="head"></tr></thead>
     <tbody id="body"></tbody>
   </table>
 
   <section class="extras" id="extrasSection">
     <h2>Délutáni programok</h2>
-    <p class="extras-sub">Iskolán kívüli vagy egyedi elfoglaltságok — az órarenddel átfedésben is lehetnek.</p>
     <div class="extras-grid" id="extrasGrid"></div>
   </section>
 
   <section class="extras" id="friendsSection">
     <h2>Barátnők</h2>
-    <p class="extras-sub">Baráti találkozók, programok.</p>
     <table class="grid" id="friendsTable">
       <thead><tr id="friendsHead"></tr></thead>
       <tbody id="friendsBody"></tbody>
@@ -564,6 +555,11 @@
     {day:4, name:"Szolfézs miatti pótlás"},
     {day:1, t:"15:45–16:30", s:945, e:990, name:"Környezetismeret szakkör"},
     {day:1, t:"16:30–17:15", s:990, e:1035, name:"Önismereti szakkör"}
+  ];
+
+  const TEACHERS = [
+    {name:"Szabó Anita", days:[0,1,4], color:"tanar1"},
+    {name:"Szakál Zsolt", days:[2,3], color:"tanar2"}
   ];
 
   // name + napi érték (Hétfő..Péntek); "-" = nincs, egyéb szöveg = státusz; color = kitöltött napok színe
@@ -634,6 +630,12 @@
     return `<tr><th class="time" scope="row">${f.name}</th>${cells}</tr>`;
   }).join("");
 
+  // --- tanítók ---
+  document.getElementById("teacherInfo").innerHTML = TEACHERS.map(t => {
+    const days = t.days.map(i => SHORT[i]).join(", ");
+    return `<span class="who c-${t.color}" data-days="${t.days.join(",")}">${t.name}</span> (${days})`;
+  }).join(" · ");
+
   // --- napválasztó ---
   const tabs = document.getElementById("daytabs");
   tabs.innerHTML = DAYS.map((d,i)=>
@@ -668,6 +670,10 @@
     let label = "Most", subject = "—", meta = "", next = "", color = "var(--ink-soft)", extraNow = "";
 
     const todayIx = day >= 0 && day <= 4 ? day : -1;
+    document.querySelectorAll(".subtitle .who").forEach(el => {
+      const days = el.dataset.days.split(",").map(Number);
+      el.classList.toggle("is-today", todayIx > -1 && days.includes(todayIx));
+    });
     if (todayIx > -1){
       document.querySelectorAll(`.extras-col h3[data-day="${todayIx}"]`).forEach(el => el.classList.add("is-today"));
       const activeExtra = EXTRAS.find(x => x.day === todayIx && min >= x.s && min < x.e);
